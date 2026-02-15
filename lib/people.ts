@@ -42,7 +42,7 @@ export const PEOPLE: Person[] = [
   },
   {
     id: "5",
-    name: "Lekesh",
+    name: "Lekhesh",
     role: "11th November 2004",
     image: "/people/Lekesh.png",
     bio: "I Just love black Tshirts.",
@@ -59,7 +59,7 @@ export const PEOPLE: Person[] = [
   {
     id: "7",
     name: "Matsa Pawan",
-    role: "25th May 2004",
+    role: "20th August 2004",
     image: "/people/Matsa.jpg",
     bio: "Creating beautiful and intuitive user experiences.",
     color: "#E5F3FF"
