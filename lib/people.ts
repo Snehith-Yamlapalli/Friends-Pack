@@ -67,7 +67,7 @@ export const PEOPLE: Person[] = [
   {
     id: "8",
     name: "Dhanush",
-    role: "20th August 2004",
+    role: "20th November 2004",
     image: "/people/Dani.jpg",
     bio: "Creating beautiful and intuitive user experiences.",
     color: "#E5F3FF"
