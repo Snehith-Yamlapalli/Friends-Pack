@@ -13,7 +13,7 @@ export const PEOPLE: Person[] = [
     name: "Harshit",
     role: "14th April 2004",
     image: "/people/harshit.png",
-    bio: "I Just love black Tshirts.",
+    bio: "I Just love black Tshirts 📈",
     color: "#FFE5E5"
   },
   {
@@ -27,7 +27,7 @@ export const PEOPLE: Person[] = [
   {
     id: "3",
     name: "Snehith",
-    role: "10th June 2003",
+    role: "10th June 2004",
     image: "/people/snehith.png",
     bio: "Turning data into actionable insights and predictions.",
     color: "#FFF5E5"
@@ -58,10 +58,10 @@ export const PEOPLE: Person[] = [
   },
   {
     id: "7",
-    name: "Matsa Pawan",
-    role: "20th August 2004",
+    name: "Matsa Pavan Kumar",
+    role: "20th August 2005",
     image: "/people/Matsa.jpg",
-    bio: "Creating beautiful and intuitive user experiences.",
+    bio: "Keep smiling",
     color: "#E5F3FF"
   },
   {
@@ -85,7 +85,7 @@ export const PEOPLE: Person[] = [
     name: "Abhishek",
     role: "29th November 2004",
     image: "/people/Abhi.png",
-    bio: "Creating beautiful and intuitive user experiences.",
+    bio: "Be grateful for everything",
     color: "#E5F3FF"
   },
   {
