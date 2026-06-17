@@ -1,24 +1,39 @@
 'use client';
 
 import Image from "next/image";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { COLOR_PALETTE, getHoverColor } from "@/lib/palette";
-import { STORIES } from "@/lib/stories";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./auth/firebase";
+import { StoryData } from "@/lib/stories";
+import { getStories } from "@/lib/firestoreStories";
+import { isAdminEmail } from "@/lib/admins";
 
 export default function Home() {
   const [currentPhoto, setCurrentPhoto] = useState(0);
-  const [bgColor, setBgColor] = useState<string>(COLOR_PALETTE[0]); // Start with first color for SSR
+  const [stories, setStories] = useState<StoryData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
 
-  // Set random background color after mount (client-side only)
+  // Load events from Firestore (newest first).
   useEffect(() => {
-    setBgColor(COLOR_PALETTE[Math.floor(Math.random() * COLOR_PALETTE.length)]);
+    getStories()
+      .then((uploaded) => setStories(uploaded))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
+  // Only admins (see lib/admins.ts) may add events.
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAdmin(isAdminEmail(user?.email));
+    });
+    return () => unsubscribe();
+  }, []);
 
-
-  const photos = STORIES.map(story => ({
+  // Only show the latest 5 events (uploaded events come first, newest first).
+  const photos = stories.slice(0, 5).map(story => ({
     id: story.id,
     url: story.thumbnail,
     summary: story.summary,
@@ -33,15 +48,6 @@ export default function Home() {
 
   const prevPhoto = () => {
     setCurrentPhoto((prev) => (prev - 1 + photos.length) % photos.length);
-  };
-
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      second: '2-digit',
-      hour12: false 
-    });
   };
 
   return (
@@ -68,12 +74,12 @@ export default function Home() {
         {/* Header */}
         <header className="mb-4 sm:mb-6 flex-shrink-0">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-            {/* Spacer for alignment on desktop */}
+            {/* Spacer keeps the title centered on desktop. */}
             <div className="hidden sm:block sm:w-32 md:w-40"></div>
-            
+
             {/* Title - centered */}
             <div className="flex-shrink-0">
-              <h1 
+              <h1
                 className="text-sm sm:text-xl md:text-2xl lg:text-3xl font-black border-4 sm:border-6 md:border-8 border-black inline-block px-3 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
                 style={{
                   fontFamily: "'Press Start 2P', monospace",
@@ -84,7 +90,7 @@ export default function Home() {
                 VIKINGS 2022-2026
               </h1>
             </div>
-            
+
             {/* Meet People Button - right aligned on desktop, centered on mobile */}
             <button
               onClick={() => router.push('/people')}
@@ -99,6 +105,37 @@ export default function Home() {
               </div>
             </button>
           </div>
+
+          {/* Action buttons below the title */}
+          <div className="mt-3 sm:mt-4 flex items-center justify-center gap-3 sm:gap-4 flex-wrap">
+            {isAdmin && (
+              <button
+                onClick={() => router.push('/upload')}
+                className="arrow-hover group flex-shrink-0"
+                aria-label="Add a new event"
+              >
+                <div className="flex items-center gap-1.5 sm:gap-2 bg-white border-2 border-black px-2 py-1.5 sm:px-3 sm:py-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 group-hover:translate-x-[-2px] group-hover:translate-y-[-2px]">
+                  <span className="text-sm sm:text-base arrow-icon transition-transform">+</span>
+                  <span className="text-[8px] sm:text-[10px] font-black whitespace-nowrap" style={{ fontFamily: "'Press Start 2P', monospace" }}>
+                    ADD EVENT
+                  </span>
+                </div>
+              </button>
+            )}
+
+            <button
+              onClick={() => router.push('/events')}
+              className="arrow-hover group flex-shrink-0"
+              aria-label="See all events"
+            >
+              <div className="flex items-center gap-1.5 sm:gap-2 bg-white border-2 border-black px-2 py-1.5 sm:px-3 sm:py-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 group-hover:translate-x-[-2px] group-hover:translate-y-[-2px]">
+                <span className="text-[8px] sm:text-[10px] font-black whitespace-nowrap" style={{ fontFamily: "'Press Start 2P', monospace" }}>
+                  ALL EVENTS
+                </span>
+                <span className="text-sm sm:text-base arrow-icon transition-transform">→</span>
+              </div>
+            </button>
+          </div>
         </header>
 
         {/* Main Content Grid */}
@@ -108,67 +145,77 @@ export default function Home() {
             {/* HUD Corner Brackets */}
            
             
-            <div className="flex-1 relative flex items-center justify-center overflow-hidden border-2 sm:border-4 border-black cursor-pointer group"
-              onClick={() => router.push(`/story/${photos[currentPhoto].id}`)}
-            >
-              <Image
-                src={photos[currentPhoto].url}
-                alt={`Photo ${currentPhoto + 1}`}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                unoptimized
-              />
-              
-              {/* Click to view overlay */}
-              <div className="absolute inset-0  opacity-50 bg-opacity-0 hover:opacity-100 group-hover:bg-opacity-75 transition-all duration-300 flex items-center justify-center z-10">
-                <div className="opacity-0  group-hover:opacity-75 hover:opacity-100 transition-opacity duration-300 text-white text-xs sm:text-sm md:text-base font-black border-4 border-white px-6 py-3 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]" style={{ fontFamily: "'Press Start 2P', monospace", letterSpacing: '0.1em' }}>
-                  CLICK TO VIEW
-                </div>
-              </div>
-              
-              {/* Navigation Arrows - 8-bit style */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  prevPhoto();
-                }}
-                className="absolute left-1 sm:left-2 md:left-4 top-1/2 -translate-y-1/2 text-white text-3xl sm:text-5xl md:text-7xl font-black transition-all z-10   w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 flex items-center justify-center opacity-50 hover:opacity-100"
-                style={{ fontFamily: "'Press Start 2P', monospace" }}
-                aria-label="Previous photo"
-              >
-                ‹
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  nextPhoto();
-                }}
-                className="absolute right-1 sm:right-2 md:right-4 top-1/2 -translate-y-1/2 text-white text-3xl sm:text-5xl md:text-7xl font-black transition-all z-10    w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 flex items-center justify-center opacity-50 hover:opacity-100"
-                style={{ fontFamily: "'Press Start 2P', monospace" }}
-                aria-label="Next photo"
-              >
-                ›
-              </button>
+            {photos.length > 0 ? (
+              <>
+                <div className="flex-1 relative flex items-center justify-center overflow-hidden border-2 sm:border-4 border-black cursor-pointer group"
+                  onClick={() => router.push(`/story/${photos[currentPhoto].id}`)}
+                >
+                  <Image
+                    src={photos[currentPhoto].url}
+                    alt={`Photo ${currentPhoto + 1}`}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    unoptimized
+                  />
 
-              {/* Photo counter HUD */}
-              <div className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4  bg-opacity-80 border-2 border-white px-2 py-1 sm:px-4 sm:py-2 text-white font-mono text-xs sm:text-sm z-10" style={{ fontFamily: "'Press Start 2P', monospace" }}>
-                [{currentPhoto + 1}/{photos.length}]
-              </div>
-            </div>
-            
-            <div className="mt-3 sm:mt-4 flex-shrink-0">
-              <h2 className="text-sm sm:text-xl md:text-2xl font-black text-center mb-2" style={{ fontFamily: "'Press Start 2P', monospace" }}>
-                /// EVENT
-              </h2>
-              <div className="flex items-center justify-center gap-2 text-[10px] sm:text-xs font-mono">
-                <div className="bg-black text-white px-2 py-1 border-2 border-black">
-                   {photos[currentPhoto].date}
+                  {/* Click to view overlay */}
+                  <div className="absolute inset-0  opacity-50 bg-opacity-0 hover:opacity-100 group-hover:bg-opacity-75 transition-all duration-300 flex items-center justify-center z-10">
+                    <div className="opacity-0  group-hover:opacity-75 hover:opacity-100 transition-opacity duration-300 text-white text-xs sm:text-sm md:text-base font-black border-4 border-white px-6 py-3 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)]" style={{ fontFamily: "'Press Start 2P', monospace", letterSpacing: '0.1em' }}>
+                      CLICK TO VIEW
+                    </div>
+                  </div>
+
+                  {/* Navigation Arrows - 8-bit style */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      prevPhoto();
+                    }}
+                    className="absolute left-1 sm:left-2 md:left-4 top-1/2 -translate-y-1/2 bg-transparent text-black border-2 border-white text-2xl sm:text-3xl md:text-4xl font-black leading-none pb-1 transition-colors z-10 w-9 h-14 sm:w-12 sm:h-16 md:w-14 md:h-20 flex items-center justify-center hover:bg-white"
+                    style={{ fontFamily: "'Press Start 2P', monospace" }}
+                    aria-label="Previous photo"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      nextPhoto();
+                    }}
+                    className="absolute right-1 sm:right-2 md:right-4 top-1/2 -translate-y-1/2 bg-transparent text-black border-2 border-white text-2xl sm:text-3xl md:text-4xl font-black leading-none pb-1 transition-colors z-10 w-9 h-14 sm:w-12 sm:h-16 md:w-14 md:h-20 flex items-center justify-center hover:bg-white"
+                    style={{ fontFamily: "'Press Start 2P', monospace" }}
+                    aria-label="Next photo"
+                  >
+                    ›
+                  </button>
+
+                  {/* Photo counter HUD */}
+                  <div className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 bg-black border-2 border-white px-2 py-1 sm:px-4 sm:py-2 text-white font-mono text-xs sm:text-sm z-10" style={{ fontFamily: "'Press Start 2P', monospace" }}>
+                    [{currentPhoto + 1}/{photos.length}]
+                  </div>
                 </div>
-                <div className="bg-black text-white px-2 py-1 border-2 border-black">
-                   {photos[currentPhoto].time}
+
+                <div className="mt-3 sm:mt-4 flex-shrink-0">
+                  <h2 className="text-sm sm:text-xl md:text-2xl font-black text-center mb-2" style={{ fontFamily: "'Press Start 2P', monospace" }}>
+                    /// EVENT
+                  </h2>
+                  <div className="flex items-center justify-center gap-2 text-[10px] sm:text-xs font-mono">
+                    <div className="bg-black text-white px-2 py-1 border-2 border-black">
+                       {photos[currentPhoto].date}
+                    </div>
+                    <div className="bg-black text-white px-2 py-1 border-2 border-black">
+                       {photos[currentPhoto].time}
+                    </div>
+                  </div>
                 </div>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center border-2 sm:border-4 border-black text-center p-6">
+                <p className="text-xs sm:text-sm font-black" style={{ fontFamily: "'Press Start 2P', monospace", lineHeight: '1.8' }}>
+                  {loading ? 'LOADING...' : 'NO EVENTS YET'}
+                </p>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Right Sidebar */}
@@ -199,7 +246,7 @@ export default function Home() {
               </h3>
               <div className="flex-1 overflow-y-auto pr-2">
                 <p className="text-xs sm:text-sm font-bold leading-relaxed" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-                  {photos[currentPhoto].summary}
+                  {photos[currentPhoto]?.summary ?? (loading ? 'Loading...' : 'No events yet. Add one to get started.')}
                 </p>
               </div>
             </div>

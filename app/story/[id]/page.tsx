@@ -1,17 +1,35 @@
 'use client';
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { STORIES } from "@/lib/stories";
+import { StoryData } from "@/lib/stories";
+import { getStoryById } from "@/lib/firestoreStories";
 
 export default function StoryPage() {
   const router = useRouter();
   const params = useParams();
   const storyId = params.id as string;
-  
-  const story = STORIES.find(s => s.id === storyId);
+
+  // undefined = still loading, null = not found
+  const [story, setStory] = useState<StoryData | null | undefined>(undefined);
   const [currentImage, setCurrentImage] = useState(0);
+
+  useEffect(() => {
+    getStoryById(storyId)
+      .then(setStory)
+      .catch(() => setStory(null));
+  }, [storyId]);
+
+  if (story === undefined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        <h1 className="text-sm" style={{ fontFamily: "'Press Start 2P', monospace" }}>
+          LOADING...
+        </h1>
+      </div>
+    );
+  }
 
   if (!story) {
     return (
