@@ -111,8 +111,8 @@ export default function EventsPage() {
                   unoptimized
                 />
 
-                {/* Delete - admins only */}
-                {isAdmin && (
+                {/* Delete - admins only (temporarily disabled) */}
+                {/* {isAdmin && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -125,7 +125,7 @@ export default function EventsPage() {
                   >
                     {deletingId === story.id ? '...' : 'DELETE'}
                   </button>
-                )}
+                )} */}
               </div>
 
               {/* Card Content */}
