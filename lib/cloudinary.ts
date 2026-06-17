@@ -21,11 +21,13 @@ export async function uploadImage(file: File): Promise<string> {
     { method: 'POST', body: form }
   );
 
+  const data = await res.json().catch(() => null);
+
   if (!res.ok) {
-    throw new Error(`Cloudinary upload failed (${res.status})`);
+    const reason = data?.error?.message || `HTTP ${res.status}`;
+    throw new Error(`"${file.name}" failed: ${reason}`);
   }
 
-  const data = await res.json();
   return data.secure_url as string;
 }
 

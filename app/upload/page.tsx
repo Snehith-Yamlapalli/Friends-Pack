@@ -11,6 +11,7 @@ import { isAdminEmail } from '@/lib/admins';
 
 const MIN_IMAGES = 2;
 const MAX_IMAGES = 10;
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB — Cloudinary free plan limit
 
 const PIXEL_FONT = { fontFamily: "'Press Start 2P', monospace" } as const;
 
@@ -87,6 +88,14 @@ export default function UploadPage() {
     }
     if (files.length > MAX_IMAGES) {
       setError(`Please add no more than ${MAX_IMAGES} pictures.`);
+      return;
+    }
+    const tooBig = files.filter((f) => f.size > MAX_FILE_SIZE);
+    if (tooBig.length) {
+      setError(
+        `Over 10 MB (too large): ${tooBig.map((f) => f.name).join(', ')}. ` +
+          `Please compress or pick smaller images.`
+      );
       return;
     }
 
