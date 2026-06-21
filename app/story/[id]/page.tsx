@@ -94,12 +94,12 @@ export default function StoryPage() {
           {/* Image Gallery - 2 columns */}
           <div className="lg:col-span-2 border-2 sm:border-4 border-black bg-white p-3 sm:p-4 md:p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] flex flex-col">
             {/* Main Image */}
-            <div className="relative flex-1 min-h-[300px] sm:min-h-[400px] md:min-h-[500px] border-2 sm:border-4 border-black mb-4">
+            <div className="relative flex-1 min-h-[300px] sm:min-h-[400px] md:min-h-[500px] border-2 sm:border-4 border-black mb-4 bg-black">
               <Image
                 src={story.images[currentImage]}
                 alt={`${story.title} - Image ${currentImage + 1}`}
                 fill
-                className="object-cover"
+                className="object-contain"
                 unoptimized
               />
               

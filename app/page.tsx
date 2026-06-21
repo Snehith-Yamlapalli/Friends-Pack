@@ -147,14 +147,14 @@ export default function Home() {
             
             {photos.length > 0 ? (
               <>
-                <div className="flex-1 relative flex items-center justify-center overflow-hidden border-2 sm:border-4 border-black cursor-pointer group"
+                <div className="flex-1 relative flex items-center justify-center overflow-hidden border-2 sm:border-4 border-black cursor-pointer group bg-black"
                   onClick={() => router.push(`/story/${photos[currentPhoto].id}`)}
                 >
                   <Image
                     src={photos[currentPhoto].url}
                     alt={`Photo ${currentPhoto + 1}`}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="object-contain group-hover:scale-105 transition-transform duration-300"
                     unoptimized
                   />
 
@@ -196,8 +196,8 @@ export default function Home() {
                 </div>
 
                 <div className="mt-3 sm:mt-4 flex-shrink-0">
-                  <h2 className="text-sm sm:text-xl md:text-2xl font-black text-center mb-2" style={{ fontFamily: "'Press Start 2P', monospace" }}>
-                    /// EVENT
+                  <h2 className="text-sm sm:text-xl md:text-2xl font-black text-center mb-2 break-words" style={{ fontFamily: "'Press Start 2P', monospace", lineHeight: '1.6' }}>
+                    {photos[currentPhoto].title}
                   </h2>
                   <div className="flex items-center justify-center gap-2 text-[10px] sm:text-xs font-mono">
                     <div className="bg-black text-white px-2 py-1 border-2 border-black">
