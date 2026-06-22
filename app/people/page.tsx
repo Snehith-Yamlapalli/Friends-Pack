@@ -5,6 +5,23 @@ import { useRouter } from "next/navigation";
 import { PEOPLE } from "@/lib/people";
 import { useState } from "react";
 
+const MONTHS = [
+  "january", "february", "march", "april", "may", "june",
+  "july", "august", "september", "october", "november", "december",
+];
+
+// Build a sortable key from a birthday string like "14th April 2004"
+// using month + day only (year ignored).
+function birthdayKey(role: string): number {
+  const day = parseInt(role.match(/\d+/)?.[0] ?? "0", 10);
+  const month = MONTHS.findIndex((m) => role.toLowerCase().includes(m));
+  return (month < 0 ? 99 : month) * 100 + day;
+}
+
+const SORTED_PEOPLE = [...PEOPLE].sort(
+  (a, b) => birthdayKey(a.role) - birthdayKey(b.role)
+);
+
 export default function PeoplePage() {
   const router = useRouter();
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
@@ -41,7 +58,7 @@ export default function PeoplePage() {
 
         {/* People Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {PEOPLE.map((person) => (
+          {SORTED_PEOPLE.map((person) => (
             <div
               key={person.id}
               className="border-4 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 overflow-hidden group cursor-pointer"

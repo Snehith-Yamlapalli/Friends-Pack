@@ -220,8 +220,8 @@ export default function Home() {
 
           {/* Right Sidebar */}
           <div className="flex flex-col gap-4 sm:gap-6 overflow-visible lg:overflow-hidden h-auto lg:h-full max-h-none lg:max-h-full">
-            {/* Spotify Player */}
-            <div className="border-2 sm:border-4 border-black bg-white p-3 sm:p-4 flex-shrink-0 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative">
+            {/* Spotify Player — below the summary on mobile, above on desktop */}
+            <div className="order-2 lg:order-1 border-2 sm:border-4 border-black bg-white p-3 sm:p-4 flex-shrink-0 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative">
               <div className="w-full">
                 <iframe
                   src="https://open.spotify.com/embed/playlist/2SS3mIt20CJRGsJjxvWHnh?utm_source=generator&theme=0"  
@@ -238,8 +238,8 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Summary */}
-            <div className="border-2 sm:border-4 border-black bg-white p-3 sm:p-4 flex-1 min-h-[200px] lg:min-h-0 overflow-visible lg:overflow-hidden flex flex-col shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative">
+            {/* Summary — above Spotify on mobile, below on desktop */}
+            <div className="order-1 lg:order-2 border-2 sm:border-4 border-black bg-white p-3 sm:p-4 flex-1 min-h-[200px] lg:min-h-0 overflow-visible lg:overflow-hidden flex flex-col shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] relative">
               <div className="absolute top-2 left-2 text-[#CCFF00] text-xs font-mono">|||</div>
               <h3 className="text-[10px] sm:text-xs font-black mb-2 sm:mb-3 pb-2 border-b-2 border-black flex-shrink-0" style={{ fontFamily: "'Press Start 2P', monospace" }}>
                 [SUMMARY]
